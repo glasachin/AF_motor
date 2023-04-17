@@ -1,0 +1,13 @@
+af_position; ==> to send the motor position in terms of pulse
+
+af_reset; ==> to move the motor to its 0 position
+
+af_range;
+
+af_run_forward;<PWM>;1000;  ==> to move motor in forward direction for specific pulse count with specific speed, 0 < PWM < 255
+af_run_forward;50;1000;
+
+af_run_backward;<PWM>;1000; ==> To move motor in backward direction for specific pulse count with specific speed, 0 < PWM < 255
+af_run_backward;50;1000;
+
+af_stop; ==> To stop the motor
