@@ -28,6 +28,7 @@ void AF_ENCODER_ISR()
     AF_stop(); // Stop motor
     detachInterrupt(digitalPinToInterrupt(AF_ENCODER));
     Serial.print("Pulse Count: "); Serial.println(AF_ENCODER_COUNT);
+    Serial.print("Current Position: "); Serial.println(CURRENT_POSITION);
     AF_ENCODER_COUNT = 0;
   }
 }

@@ -23,8 +23,8 @@ void setup() {
   // Attach encoder to Interrupt pin
   attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
 
-  // Start motor forward
-  AF_stop();
+  // Go to home position or 0 position
+  AF_home();
 }
 
 void loop() {
@@ -49,6 +49,11 @@ void loop() {
       move_direction = 1; // backward
       AF_run_motor_backward(rest);
     }
+    else if(op_cmd == "af_move")
+    {
+      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
+      AF_find_dir(rest); // Find AF motor's moving direction
+    }
     else if(op_cmd == "af_position")
     {
       Serial.print("af_pos;");Serial.print(CURRENT_POSITION);Serial.println(";");
@@ -64,8 +69,9 @@ void loop() {
     }
     else if(op_cmd == "reset")
     {
-      CURRENT_POSITION = 0;
+      AF_home(); // move motor to home position
     }
+    
   }
   
   delay(10);
