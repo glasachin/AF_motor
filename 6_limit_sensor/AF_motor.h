@@ -10,6 +10,12 @@ void AF_motor_init(void)
   pinMode(AF_M1_1, OUTPUT);
 }
 
+// limit switch Pins initialization
+void limit_switch_init(void)
+{
+  pinMode(LIMIT_SWITCH, INPUT_PULLUP);
+}
+
 // AF_Motor Forward
 void AF_forward(void)
 {
@@ -34,8 +40,21 @@ void AF_stop(void)
 // 
 void AF_home(void)
 {
+  int temp = 0;
   // Move motor backward till we hit the optical sensor
-
+//  Serial.println("Going to Home");
+  AF_backward();
+//  while(digitalRead(LIMIT_SWITCH) == 0)
+  while(temp == 0)
+  {
+    temp = digitalRead(LIMIT_SWITCH);
+//    Serial.println(temp);
+  }
+//  Serial.print("Limit Switch: ");Serial.println(digitalRead(LIMIT_SWITCH));
+  AF_forward();
+  AF_stop();
+//  Serial.println("Reached Home Position");
+  Serial.println("home;");
   // set cur_position to 0
   CURRENT_POSITION = 0;
 }
@@ -64,6 +83,7 @@ void AF_run_motor_forward(char* pulse_info)
   Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move forward: "); Serial.println(pulses);
   AF_ENCODER_COUNT = 0;
   AF_PWM_forward(pwm_val); // start AF motor in forward direction with specific PWM
+  attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
 }
 
 //RUN AF motor for specific pulses
@@ -76,6 +96,7 @@ void AF_run_motor_backward(char* pulse_info)
   Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move backward: "); Serial.println(pulses);
   AF_ENCODER_COUNT = 0;
   AF_PWM_backward(pwm_val); // start AF motor in backward direction with specific PWM
+  attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
 }
 
 // find motor direction to run
@@ -99,6 +120,7 @@ void AF_find_dir(char *pos_info)
       move_direction = 0; //forward
       AF_ENCODER_COUNT = 0;
       AF_PWM_forward(pwm_val); // start AF motor in forward direction with specific PWM
+      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
     }
     else if(abs_pos < CURRENT_POSITION)
     {
@@ -106,6 +128,7 @@ void AF_find_dir(char *pos_info)
       move_direction = 1; //Backward
       AF_ENCODER_COUNT = 0;
       AF_PWM_backward(pwm_val); // start AF motor in backward direction with specific PWM
+      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
     }
     else
     {}

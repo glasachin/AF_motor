@@ -1,6 +1,6 @@
 #include"constants.h"
+#include"AF_motor.h"
 #include"ISRs.h"
-
 
 unsigned long int current_count = 0;
 unsigned long int prev_count = 0;
@@ -19,9 +19,7 @@ void setup() {
 
   // Initialize Motor Pins
   AF_motor_init();
-
-  // Attach encoder to Interrupt pin
-  attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
+  limit_switch_init();
 
   // Go to home position or 0 position
   AF_home();
@@ -39,19 +37,16 @@ void loop() {
     op_cmd = String(strtok_r(rest,";",&rest));
     if(op_cmd == "af_run_forward")
     {
-      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
       move_direction = 0; //forward
       AF_run_motor_forward(rest);
     }
     else if(op_cmd == "af_run_backward")
     {
-      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
       move_direction = 1; // backward
       AF_run_motor_backward(rest);
     }
     else if(op_cmd == "af_move")
     {
-      attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
       AF_find_dir(rest); // Find AF motor's moving direction
     }
     else if(op_cmd == "af_position")
@@ -67,12 +62,11 @@ void loop() {
       Serial.print("af_min;");Serial.print(AF_MIN_RANGE);Serial.println(";"); // Send min range
       Serial.print("af_max;");Serial.print(AF_MAX_RANGE);Serial.println(";");// Send min range 
     }
-    else if(op_cmd == "reset")
+    else if(op_cmd == "af_reset")
     {
+      detachInterrupt(digitalPinToInterrupt(AF_ENCODER));
       AF_home(); // move motor to home position
     }
-    
   }
-  
   delay(10);
 }
