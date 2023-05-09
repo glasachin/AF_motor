@@ -11,9 +11,9 @@ void AF_motor_init(void)
 }
 
 // limit switch Pins initialization
-void limit_switch_init(void)
+void AF_limit_switch_init(void)
 {
-  pinMode(LIMIT_SWITCH, INPUT_PULLUP);
+  pinMode(AF_LIMIT_SWITCH, INPUT_PULLUP);
 }
 
 // AF_Motor Forward
@@ -47,16 +47,15 @@ void AF_home(void)
 //  while(digitalRead(LIMIT_SWITCH) == 0)
   while(temp == 0)
   {
-    temp = digitalRead(LIMIT_SWITCH);
-//    Serial.println(temp);
+    temp = digitalRead(AF_LIMIT_SWITCH);
   }
 //  Serial.print("Limit Switch: ");Serial.println(digitalRead(LIMIT_SWITCH));
   AF_forward();
   AF_stop();
 //  Serial.println("Reached Home Position");
-  Serial.println("home;");
+  Serial.println("AF_home;");
   // set cur_position to 0
-  CURRENT_POSITION = 0;
+  AF_CURRENT_POSITION = 0;
 }
 
 // PWM AF_Motor Forward
@@ -77,10 +76,10 @@ void AF_PWM_backward(int PWM_VAL)
 void AF_run_motor_forward(char* pulse_info)
 {
   int pwm_val;
-  pulses = 0;
+  AF_pulses = 0;
   pwm_val = atoi(strtok_r(pulse_info,";",&pulse_info));
-  pulses = strtol(strtok_r(pulse_info,";",&pulse_info),NULL, 0); // to convert into long int
-  Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move forward: "); Serial.println(pulses);
+  AF_pulses = strtol(strtok_r(pulse_info,";",&pulse_info),NULL, 0); // to convert into long int
+  Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move forward: "); Serial.println(AF_pulses);
   AF_ENCODER_COUNT = 0;
   AF_PWM_forward(pwm_val); // start AF motor in forward direction with specific PWM
   attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
@@ -90,10 +89,10 @@ void AF_run_motor_forward(char* pulse_info)
 void AF_run_motor_backward(char* pulse_info)
 {
   int pwm_val;
-  pulses = 0;
+  AF_pulses = 0;
   pwm_val = atoi(strtok_r(pulse_info,";",&pulse_info));
-  pulses = strtol(strtok_r(pulse_info,";",&pulse_info),NULL, 0); // to convert into long int
-  Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move backward: "); Serial.println(pulses);
+  AF_pulses = strtol(strtok_r(pulse_info,";",&pulse_info),NULL, 0); // to convert into long int
+  Serial.print("PWM: "); Serial.print(pwm_val);Serial.print(", Pulse to move backward: "); Serial.println(AF_pulses);
   AF_ENCODER_COUNT = 0;
   AF_PWM_backward(pwm_val); // start AF motor in backward direction with specific PWM
   attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
@@ -114,18 +113,18 @@ void AF_find_dir(char *pos_info)
   }
   else
   {
-    if(abs_pos > CURRENT_POSITION)
+    if(abs_pos > AF_CURRENT_POSITION)
     {
-      pulses = abs_pos - CURRENT_POSITION;
-      move_direction = 0; //forward
+      AF_pulses = abs_pos - AF_CURRENT_POSITION;
+      AF_move_direction = 0; //forward
       AF_ENCODER_COUNT = 0;
       AF_PWM_forward(pwm_val); // start AF motor in forward direction with specific PWM
       attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
     }
-    else if(abs_pos < CURRENT_POSITION)
+    else if(abs_pos < AF_CURRENT_POSITION)
     {
-      pulses = CURRENT_POSITION - abs_pos;
-      move_direction = 1; //Backward
+      AF_pulses = AF_CURRENT_POSITION - abs_pos;
+      AF_move_direction = 1; //Backward
       AF_ENCODER_COUNT = 0;
       AF_PWM_backward(pwm_val); // start AF motor in backward direction with specific PWM
       attachInterrupt(digitalPinToInterrupt(AF_ENCODER), AF_ENCODER_ISR, RISING);
